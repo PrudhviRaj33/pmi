@@ -63,4 +63,8 @@ def download_file(filename):
 if __name__ == '__main__':
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
     os.makedirs(app.config['OUTPUT_FOLDER'], exist_ok=True)
-    app.run(debug=True)
+    
+    # Bind to 0.0.0.0 and use the PORT environment variable
+    port = int(os.environ.get("PORT", 5000))  # Default to 5000 if PORT not set
+    app.run(host='0.0.0.0', port=port, debug=True)
+
