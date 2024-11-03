@@ -4,3 +4,4 @@ python-docx==0.8.11
 PyMuPDF==1.23.1
 Werkzeug==2.2.3
 flask-cors
+firebase-admin
