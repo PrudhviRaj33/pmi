@@ -2,15 +2,13 @@ from flask import Flask, request, jsonify, send_from_directory
 import os
 import time
 from werkzeug.utils import secure_filename
-from PyPDF2 import PdfWriter, PdfReader
 import fitz  # PyMuPDF
-from docx import Document  # For DOCX files
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['OUTPUT_FOLDER'] = 'outputs'
-ALLOWED_EXTENSIONS = {'pdf', 'txt', 'docx'}
+ALLOWED_EXTENSIONS = {'pdf'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -24,11 +22,20 @@ def highlight_in_pdf(file_path, keywords, output_path):
         doc = fitz.open(file_path)
         for page in doc:
             for keyword in keywords:
+                keyword = keyword.strip()  # Strip any leading/trailing whitespace
                 areas = page.search_for(keyword)
-                for area in areas:
-                    highlight = page.add_highlight_annot(area)
-                    highlight.update()
+
+                if areas:  # If any areas are found for the keyword
+                    for area in areas:
+                        highlight = page.add_highlight_annot(area)
+                        highlight.update()
+                    print(f"Highlighted '{keyword}' on page {page.number + 1}.")
+                else:
+                    print(f"No occurrences of '{keyword}' found on page {page.number + 1}.")
+
         doc.save(output_path)
+        doc.close()  # Close the document after saving
+        print(f"Saved highlighted PDF to '{output_path}'.")
     except Exception as e:
         print(f"Error highlighting PDF: {e}")
 
@@ -39,6 +46,7 @@ def highlight():
 
     file = request.files['file']
     keywords = request.form['keywords'].split(',')
+    
     if not (file and allowed_file(file.filename)):
         return jsonify({"error": "Invalid file type"}), 400
 
@@ -53,6 +61,10 @@ def highlight():
 
     if filename.endswith('.pdf'):
         highlight_in_pdf(input_path, keywords, output_path)
+
+    # Check if the output file was created successfully
+    if not os.path.exists(output_path):
+        return jsonify({"error": "Error creating highlighted PDF"}), 500
 
     return jsonify({"highlighted_pdf_url": f"/outputs/{output_filename}"}), 200
 
