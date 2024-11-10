@@ -5,3 +5,5 @@ PyMuPDF==1.23.1
 Werkzeug==2.2.3
 flask-cors
 firebase-admin
+python-dotenv==1.0.0
+
