@@ -3,24 +3,27 @@ name: Firebase Deployment
 on:
   push:
     branches:
-      - main
+      - main  # Trigger on push to main branch
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Use the latest Ubuntu runner
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3  # Checkout the repository
 
-      - name: Set up Firebase credentials
-        run: |
-          echo "${{ secrets.FIREBASE_CREDENTIALS_JSON }}" > $HOME/.firebase/credentials.json
+    - name: Set up Firebase credentials
+      run: |
+        # Save the secret to a local file
+        echo "${{ secrets.FIREBASE_CREDENTIALS_JSON }}" > $HOME/.firebase/credentials.json
 
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
+    - name: Install dependencies
+      run: |
+        # Install required Python packages
+        pip install -r requirements.txt
 
-      - name: Deploy to Firebase
-        run: |
-          firebase deploy --token "$(cat $HOME/.firebase/credentials.json)"
+    - name: Deploy to Firebase
+      run: |
+        # Use Firebase CLI with the credentials
+        firebase deploy --token "$(cat $HOME/.firebase/credentials.json)"
